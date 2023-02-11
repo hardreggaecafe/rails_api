@@ -3,6 +3,8 @@ services:
   web:
     build: .
     command: bash -c "rm -f rails_mysql_pj/tmp/pids/server.pid && bundle exec rails s -p 8080 -b '0.0.0.0'"
+    stdin_open: true // For pry
+    tty: true // For pry
     volumes:
       - '.:/rails_mysql_pj'
     ports:
