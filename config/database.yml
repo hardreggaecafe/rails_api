@@ -50,6 +50,7 @@ test:
 #
 production:
   <<: *default
-  database: rails_mysql_pj_production
-  username: rails_mysql_pj
-  password: <%= ENV["RAILS_MYSQL_PJ_DATABASE_PASSWORD"] %>
+  host: <%= ENV['HOST'] %>
+  database: <%= ENV['DATABASE'] %>
+  username: <%= ENV['USERNAME'] %>
+  password: <%= ENV["PASSWORD"] %>

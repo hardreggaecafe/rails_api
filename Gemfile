@@ -45,5 +45,8 @@ group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
   gem 'pry-rails'
+  #gem 'pry-nav'
+  gem 'pry-byebug'
+  gem 'pry-stack_explorer'
 end
 

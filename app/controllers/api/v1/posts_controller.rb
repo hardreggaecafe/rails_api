@@ -9,7 +9,8 @@ module Api
       end
 
       def show
-        render json: { status: 'SUCCESS', message: 'Loaded the post', data: @post }
+        post = Post.find(params[:id])
+        render json: { status: 'SUCCESS', message: 'Loaded the post', data: post }
       end
 
       def create
@@ -41,7 +42,7 @@ module Api
       end
 
       def post_params
-        params.require(:post).permit(:name, :class, :strength, :skill, :dexterity)
+        params.require(:post).permit(:name, :classname, :strength, :skill, :dexterity)
         #params.require(:post).permit(:title)
       end
     end
