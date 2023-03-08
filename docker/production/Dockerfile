@@ -18,7 +18,7 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
 # bundle
 FROM builder AS bundle
 
-COPY Gemfile Gemfile.lock .
+COPY Gemfile Gemfile.lock ./
 RUN bundle install --jobs=4 --retry=3 && rm -rf $BUNDLE_PATH/ruby/$RUBY_VERSION/cache/*
 
 # yarn
