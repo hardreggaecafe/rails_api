@@ -27,6 +27,6 @@ RUN useradd -g nginx nginx
 ADD docker/production/nginx.conf /etc/nginx/nginx.conf
 ADD docker/production/entrypoint.sh /app/entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8080
 
 RUN chmod +x /app/entrypoint.sh
