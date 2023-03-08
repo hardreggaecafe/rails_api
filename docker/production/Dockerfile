@@ -21,13 +21,6 @@ FROM builder AS bundle
 COPY Gemfile Gemfile.lock ./
 RUN bundle install --jobs=4 --retry=3 && rm -rf $BUNDLE_PATH/ruby/$RUBY_VERSION/cache/*
 
-# main
-FROM builder AS main
-
-COPY . .
-
-COPY --from=bundle /vendor/bundle /vendor/bundle
-
 # nginx
 RUN groupadd nginx
 RUN useradd -g nginx nginx
