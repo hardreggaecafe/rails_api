@@ -21,12 +21,6 @@ FROM builder AS bundle
 COPY Gemfile Gemfile.lock ./
 RUN bundle install --jobs=4 --retry=3 && rm -rf $BUNDLE_PATH/ruby/$RUBY_VERSION/cache/*
 
-# yarn
-FROM builder AS yarn
-
-COPY package.json yarn.lock .
-RUN yarn install --production --frozen-lockfile && yarn cache clean
-
 # main
 FROM builder AS main
 
