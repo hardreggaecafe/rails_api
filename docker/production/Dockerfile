@@ -26,8 +26,7 @@ FROM builder AS main
 
 COPY . .
 
-COPY --from=bundle /app/vendor/bundle /app/vendor/bundle
-COPY --from=yarn /app/node_modules /app/node_modules
+COPY --from=bundle /vendor/bundle /vendor/bundle
 
 # nginx
 RUN groupadd nginx
