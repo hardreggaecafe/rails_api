@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 ruby:3.1 as base
+FROM ruby:3.1 as base
 
 WORKDIR /rails_mysql_pj
 ENV RAILS_ENV production
