@@ -1,7 +1,9 @@
 version: '3.9'
 services:
   web:
-    build: ./docker/development
+    build:
+      context: .
+      dockerfile: docker/development/Dockerfile
     command: bash -c "rm -f rails_mysql_pj/tmp/pids/server.pid && bundle exec rails s -p 8080 -b '0.0.0.0'"
     stdin_open: true // For pry
     tty: true // For pry
