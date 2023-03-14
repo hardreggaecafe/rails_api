@@ -22,11 +22,14 @@ COPY Gemfile Gemfile.lock ./
 RUN bundle install --jobs=4 --retry=3 && rm -rf $BUNDLE_PATH/ruby/$RUBY_VERSION/cache/*
 
 # nginx
+RUN apt-get install -y nginx
 RUN groupadd nginx
 RUN useradd -g nginx nginx
-ADD docker/production/nginx.conf /etc/nginx/nginx.conf
-ADD docker/production/entrypoint.sh /app/entrypoint.sh
+#ADD docker/production/nginx.conf /etc/nginx/nginx.conf
+RUN echo "example docker contena nginx"
+#ADD docker/production/entrypoint.sh /app/entrypoint.sh
+ENTRYPOINT /usr/sbin/nginx -g 'daemon off;' -c /etc/nginx/nginx.conf
 
 EXPOSE 80
 
-RUN chmod +x /app/entrypoint.sh
+#RUN chmod +x /app/entrypoint.sh
