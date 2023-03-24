@@ -1,35 +1,75 @@
-FROM ruby:3.1 as base
+# == base
+FROM ruby:3.1 AS base
 
-WORKDIR /rails_mysql_pj
+WORKDIR /app
 ENV RAILS_ENV production
 ENV BUNDLE_DEPLOYMENT true
 ENV BUNDLE_PATH vendor/bundle
 ENV BUNDLE_WITHOUT development:test
-RUN gem update --system && gem install bundler:2.1.4
 
-# builder
+RUN gem install bundler --no-document --version 2.3.26
+
+# == builder
 FROM base AS builder
 
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get update -qq && \
-    apt-get install -y build-essential vim libvips nodejs locales && \
-    npm install -g yarn
+# Add packages
+RUN apk update && apk add --no-cache --update \
+      build-base \
+      postgresql-dev \
+      tzdata \
+      git \
+      yarn \
+      shared-mime-info
 
-# bundle
+# == bundle
 FROM builder AS bundle
 
-COPY Gemfile Gemfile.lock ./
-RUN bundle install --jobs=4 --retry=3 && rm -rf $BUNDLE_PATH/ruby/$RUBY_VERSION/cache/*
+# Install gems
+COPY Gemfile Gemfile.lock .
+RUN bundle install \
+      && rm -rf $BUNDLE_PATH/ruby/$RUBY_VERSION/cache/*
 
-# nginx
-RUN apt-get install -y nginx
-RUN groupadd nginx
-RUN useradd -g nginx nginx
-ADD docker/production/nginx.conf /etc/nginx/nginx.conf
-RUN echo "example docker contena nginx"
-ADD docker/production/entrypoint.sh /app/entrypoint.sh
-ENTRYPOINT /usr/sbin/nginx -g 'daemon off;' -c /etc/nginx/nginx.conf
+# == npm
+FROM builder AS npm
 
-EXPOSE 80
+# Install npm packages
+COPY package.json yarn.lock .
+RUN yarn install --production --frozen-lockfile \
+      && yarn cache clean
 
-RUN chmod +x /app/entrypoint.sh
+# == assets
+FROM builder AS assets
+
+COPY . .
+
+COPY --from=bundle /app/vendor/bundle /app/vendor/bundle
+COPY --from=npm /app/node_modules node_modules
+
+# Set a dummy value to avoid errors when building docker image.
+# refs: https://github.com/rails/rails/issues/32947
+RUN SECRET_KEY_BASE=dummy bin/rails assets:precompile \
+      && rm -rf tmp/cache/*
+
+# == main
+FROM base AS main
+
+# Add packages
+RUN apk update && apk add --no-cache --update \
+      postgresql-dev \
+      tzdata \
+      nodejs \
+      shared-mime-info
+
+COPY . .
+
+# Copy files from each stages
+COPY --from=bundle /app/vendor/bundle /app/vendor/bundle
+COPY --from=assets /app/public/assets public/assets
+COPY --from=assets /app/public/packs public/packs
+
+ARG SHA
+ENV SHA ${SHA}
+ENV PORT 3000
+EXPOSE 3000
+
+CMD bin/rails server --port $PORT
