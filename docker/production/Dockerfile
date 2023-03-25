@@ -1,5 +1,5 @@
 # == base
-FROM ruby:3.1 AS base
+FROM ruby:3.1.3-alpine3.15 AS base
 
 WORKDIR /app
 ENV RAILS_ENV production
@@ -15,7 +15,7 @@ FROM base AS builder
 # Add packages
 RUN apk update && apk add --no-cache --update \
       build-base \
-      postgresql-dev \
+      mysql-dev \
       tzdata \
       git \
       yarn \
@@ -33,7 +33,7 @@ RUN bundle install \
 FROM builder AS npm
 
 # Install npm packages
-COPY package.json yarn.lock .
+#COPY package.json yarn.lock .
 RUN yarn install --production --frozen-lockfile \
       && yarn cache clean
 
@@ -47,15 +47,16 @@ COPY --from=npm /app/node_modules node_modules
 
 # Set a dummy value to avoid errors when building docker image.
 # refs: https://github.com/rails/rails/issues/32947
-RUN SECRET_KEY_BASE=dummy bin/rails assets:precompile \
-      && rm -rf tmp/cache/*
+#RUN SECRET_KEY_BASE=dummy bin/rails assets:precompile \
+#      && rm -rf tmp/cache/*
+RUN SECRET_KEY_BASE=dummy rm -rf tmp/cache/*
 
 # == main
 FROM base AS main
 
 # Add packages
 RUN apk update && apk add --no-cache --update \
-      postgresql-dev \
+      mysql-dev \
       tzdata \
       nodejs \
       shared-mime-info
@@ -64,8 +65,8 @@ COPY . .
 
 # Copy files from each stages
 COPY --from=bundle /app/vendor/bundle /app/vendor/bundle
-COPY --from=assets /app/public/assets public/assets
-COPY --from=assets /app/public/packs public/packs
+#COPY --from=assets /app/public/assets public/assets
+#COPY --from=assets /app/public/packs public/packs
 
 ARG SHA
 ENV SHA ${SHA}
