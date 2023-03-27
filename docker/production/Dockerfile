@@ -70,7 +70,7 @@ COPY --from=bundle /app/vendor/bundle /app/vendor/bundle
 
 ARG SHA
 ENV SHA ${SHA}
-ENV PORT 3000
-EXPOSE 3000
+ENV PORT 80
+EXPOSE 80
 
 CMD bin/rails server --port $PORT
